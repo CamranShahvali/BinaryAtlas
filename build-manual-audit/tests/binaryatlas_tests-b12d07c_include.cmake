@@ -1,0 +1,5 @@
+if(EXISTS "/home/kingc/projects/reversec++/build-manual-audit/tests/binaryatlas_tests-b12d07c_tests.cmake")
+  include("/home/kingc/projects/reversec++/build-manual-audit/tests/binaryatlas_tests-b12d07c_tests.cmake")
+else()
+  add_test(binaryatlas_tests_NOT_BUILT-b12d07c binaryatlas_tests_NOT_BUILT-b12d07c)
+endif()

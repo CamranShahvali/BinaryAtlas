@@ -1,0 +1,1 @@
+/usr/bin/clang -no-pie CMakeFiles/indirect_call.dir/fixtures/src/indirect_call.c.o -o fixtures/bin/indirect_call 

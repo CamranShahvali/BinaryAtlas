@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+5e1921cf5d8af006d710ff047aae1dbb tests/CMakeFiles/binaryatlas_fixture_stripped
+c3268cbe2a575c23f2dbbd17d74011e5 tests/fixtures/bin/direct_calls_stripped

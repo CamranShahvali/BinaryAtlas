@@ -1,0 +1,1 @@
+/usr/bin/clang -no-pie CMakeFiles/straight_line.dir/fixtures/src/straight_line.c.o -o fixtures/bin/straight_line 

@@ -1,0 +1,1 @@
+/usr/bin/clang -no-pie CMakeFiles/graphics_keywords.dir/fixtures/src/graphics_keywords.c.o -o fixtures/bin/graphics_keywords 

@@ -20,11 +20,20 @@ endfunction()
 binaryatlas_add_fixture(straight_line fixtures/src/straight_line.c)
 target_compile_options(straight_line PRIVATE -O0)
 
+binaryatlas_add_fixture(straight_line_cpp fixtures/src/straight_line_cpp.cpp)
+target_compile_options(straight_line_cpp PRIVATE -O0)
+
 binaryatlas_add_fixture(if_else fixtures/src/if_else.c)
 target_compile_options(if_else PRIVATE -O0)
 
+binaryatlas_add_fixture(branching_cpp fixtures/src/branching_cpp.cpp)
+target_compile_options(branching_cpp PRIVATE -O0)
+
 binaryatlas_add_fixture(loop fixtures/src/loop.c)
 target_compile_options(loop PRIVATE -O0)
+
+binaryatlas_add_fixture(loop_cpp fixtures/src/loop_cpp.cpp)
+target_compile_options(loop_cpp PRIVATE -O0)
 
 binaryatlas_add_fixture(switch_case fixtures/src/switch_case.c)
 target_compile_options(switch_case PRIVATE -O2)
@@ -62,8 +71,11 @@ add_executable(
 add_dependencies(
   binaryatlas_tests
   straight_line
+  straight_line_cpp
   if_else
+  branching_cpp
   loop
+  loop_cpp
   switch_case
   direct_calls
   indirect_call

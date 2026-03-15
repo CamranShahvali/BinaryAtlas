@@ -1,0 +1,1 @@
+/usr/bin/clang++ CMakeFiles/binaryatlas.dir/src/cli/main.cpp.o -o binaryatlas  libbinaryatlas_core.a _deps/capstone-build/libcapstone.a 

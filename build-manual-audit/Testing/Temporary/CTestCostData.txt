@@ -1,0 +1,19 @@
+ELF parser loads metadata, sections, and symbols from fixtures 1 0.0042353
+ELF parser supports address translation for executable sections 1 0.00487288
+ELF parser rejects malformed and truncated inputs 1 0.00404824
+ELF parser rejects invalid section table locations 1 0.00419484
+Disassembler classifies direct and indirect control flow 1 0.00349473
+Disassembler emits invalid-instruction placeholders instead of failing 1 0.00317547
+Disassembler rejects non executable sections 1 0.00449948
+Tarjan SCC detection finds loop components 1 0.00313686
+Function metrics compute cyclomatic complexity from CFG edges 1 0.00280402
+JSON writer emits expected top-level analysis schema 1 0.056439
+DOT exporter emits non-empty CFG and call graph text 1 0.00683478
+Heuristic detector scores virtual dispatch, jump tables, engine strings, and vtable regions 1 0.00312
+Direct call fixture recovers functions and call graph edges 1 0.0074782
+Loop fixture exposes a looping function with nontrivial complexity 1 0.00864886
+Switch fixture suggests a jump-table-like dispatch 1 0.00732965
+Virtual dispatch fixture surfaces vtable and indirect dispatch findings 1 0.00884573
+Graphics fixture surfaces render and runtime heuristic findings 1 0.00679637
+Stripped fixtures still produce partial structural recovery 1 0.00569804
+---

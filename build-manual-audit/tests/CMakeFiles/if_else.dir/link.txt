@@ -1,0 +1,1 @@
+/usr/bin/clang -no-pie CMakeFiles/if_else.dir/fixtures/src/if_else.c.o -o fixtures/bin/if_else 

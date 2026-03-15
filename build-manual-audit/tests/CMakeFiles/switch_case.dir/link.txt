@@ -1,0 +1,1 @@
+/usr/bin/clang -no-pie CMakeFiles/switch_case.dir/fixtures/src/switch_case.c.o -o fixtures/bin/switch_case 
