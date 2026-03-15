@@ -1,0 +1,13 @@
+Checks: >
+  bugprone-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-owning-memory,
+  -readability-identifier-length,
+  -readability-magic-numbers
+WarningsAsErrors: ''
+HeaderFilterRegex: 'include/binaryatlas/.*|src/.*|tests/.*'
+FormatStyle: file

@@ -1,0 +1,38 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build clang-format clang-tidy
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DBINARYATLAS_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Clang-Format Check
+        run: |
+          find include src tests -type f \( -name '*.hpp' -o -name '*.cpp' -o -name '*.c' \) -print0 \
+            | xargs -0 clang-format --dry-run --Werror
+
+      - name: Clang-Tidy Configure
+        run: cmake -S . -B build-tidy -G Ninja -DBINARYATLAS_BUILD_TESTS=OFF -DBINARYATLAS_ENABLE_CLANG_TIDY=ON
+
+      - name: Clang-Tidy Build
+        run: cmake --build build-tidy --parallel
