@@ -19,7 +19,7 @@ void renderList(std::ostringstream& stream, const Range& items, std::string_view
   }
 }
 
-}  // namespace
+} // namespace
 
 std::string TerminalRenderer::renderInspect(const BinaryImage& image, bool verbose)
 {
@@ -57,9 +57,7 @@ std::string TerminalRenderer::renderInspect(const BinaryImage& image, bool verbo
   return output.str();
 }
 
-std::string TerminalRenderer::renderDisassembly(
-    const DisassemblyResult& disassembly,
-    bool verbose)
+std::string TerminalRenderer::renderDisassembly(const DisassemblyResult& disassembly, bool verbose)
 {
   std::ostringstream output;
   output << "BinaryAtlas disasm\n";
@@ -149,9 +147,8 @@ std::string TerminalRenderer::renderCallGraph(const ProgramAnalysis& analysis)
   return output.str();
 }
 
-std::string TerminalRenderer::renderHeuristics(
-    const std::vector<HeuristicFinding>& findings,
-    bool verbose)
+std::string TerminalRenderer::renderHeuristics(const std::vector<HeuristicFinding>& findings,
+                                               bool verbose)
 {
   std::ostringstream output;
   output << "Heuristic findings: " << findings.size() << '\n';
@@ -185,4 +182,4 @@ std::string TerminalRenderer::renderAnalysis(const AnalysisBundle& bundle, bool 
   return output.str();
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

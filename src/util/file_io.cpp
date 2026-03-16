@@ -38,9 +38,7 @@ const Error& Status::error() const
   return *error_;
 }
 
-Status::Status(std::optional<Error> error) : error_(std::move(error))
-{
-}
+Status::Status(std::optional<Error> error) : error_(std::move(error)) {}
 
 Result<std::vector<std::uint8_t>> readBinaryFile(const std::filesystem::path& path)
 {
@@ -51,8 +49,8 @@ Result<std::vector<std::uint8_t>> readBinaryFile(const std::filesystem::path& pa
         Error::io("failed to open file: " + path.string()));
   }
 
-  const std::vector<std::uint8_t> bytes {
-      std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+  const std::vector<std::uint8_t> bytes{std::istreambuf_iterator<char>(stream),
+                                        std::istreambuf_iterator<char>()};
   return Result<std::vector<std::uint8_t>>::success(bytes);
 }
 
@@ -85,4 +83,4 @@ Status ensureDirectory(const std::filesystem::path& path)
   return Status::success();
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

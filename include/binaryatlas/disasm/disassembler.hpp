@@ -13,14 +13,12 @@ namespace binaryatlas
 class Disassembler
 {
 public:
-  [[nodiscard]] Result<DisassemblyResult> disassemble(
-      const BinaryImage& image,
-      const DisassemblyOptions& options = {}) const;
+  [[nodiscard]] Result<DisassemblyResult> disassemble(const BinaryImage& image,
+                                                      const DisassemblyOptions& options = {}) const;
 
-  [[nodiscard]] Result<DisassemblyResult> disassembleBytes(
-      Address base_address,
-      const std::vector<std::uint8_t>& bytes,
-      std::string section_name = ".text") const;
+  [[nodiscard]] Result<DisassemblyResult>
+  disassembleBytes(Address base_address, const std::vector<std::uint8_t>& bytes,
+                   std::string section_name = ".text") const;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

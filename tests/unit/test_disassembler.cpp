@@ -11,12 +11,11 @@ using namespace binaryatlas;
 TEST_CASE("Disassembler classifies direct and indirect control flow")
 {
   Disassembler disassembler;
-  const std::vector<std::uint8_t> bytes {
-      0xe8, 0x05, 0x00, 0x00, 0x00,  // call 0x100a
-      0xff, 0x10,                    // call [rax]
-      0x75, 0x02,                    // jne 0x100b
-      0xeb, 0x00,                    // jmp 0x100b
-      0xc3};                         // ret
+  const std::vector<std::uint8_t> bytes{0xe8, 0x05, 0x00, 0x00, 0x00, // call 0x100a
+                                        0xff, 0x10,                   // call [rax]
+                                        0x75, 0x02,                   // jne 0x100b
+                                        0xeb, 0x00,                   // jmp 0x100b
+                                        0xc3};                        // ret
 
   const Result<DisassemblyResult> result = disassembler.disassembleBytes(0x1000, bytes);
   REQUIRE(result);
@@ -33,7 +32,7 @@ TEST_CASE("Disassembler classifies direct and indirect control flow")
 TEST_CASE("Disassembler emits invalid-instruction placeholders instead of failing")
 {
   Disassembler disassembler;
-  const std::vector<std::uint8_t> bytes {0x90, 0x0f};
+  const std::vector<std::uint8_t> bytes{0x90, 0x0f};
 
   const Result<DisassemblyResult> result = disassembler.disassembleBytes(0x2000, bytes);
   REQUIRE(result);
@@ -55,4 +54,4 @@ TEST_CASE("Disassembler rejects non executable sections")
   REQUIRE_FALSE(result);
 }
 
-}  // namespace
+} // namespace

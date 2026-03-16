@@ -14,7 +14,7 @@ int accumulate(int limit)
   return total;
 }
 
-}  // namespace
+} // namespace
 
 int main()
 {

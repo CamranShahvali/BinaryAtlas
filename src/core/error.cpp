@@ -42,22 +42,22 @@ std::string toString(ErrorCode code)
 {
   switch (code)
   {
-    case ErrorCode::invalid_argument:
-      return "invalid_argument";
-    case ErrorCode::io_error:
-      return "io_error";
-    case ErrorCode::parse_error:
-      return "parse_error";
-    case ErrorCode::unsupported_format:
-      return "unsupported_format";
-    case ErrorCode::disassembly_error:
-      return "disassembly_error";
-    case ErrorCode::analysis_error:
-      return "analysis_error";
-    case ErrorCode::not_found:
-      return "not_found";
+  case ErrorCode::invalid_argument:
+    return "invalid_argument";
+  case ErrorCode::io_error:
+    return "io_error";
+  case ErrorCode::parse_error:
+    return "parse_error";
+  case ErrorCode::unsupported_format:
+    return "unsupported_format";
+  case ErrorCode::disassembly_error:
+    return "disassembly_error";
+  case ErrorCode::analysis_error:
+    return "analysis_error";
+  case ErrorCode::not_found:
+    return "not_found";
   }
   return "unknown";
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

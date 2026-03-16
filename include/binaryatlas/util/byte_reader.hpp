@@ -27,8 +27,7 @@ public:
     return offset <= bytes_.size() && length <= bytes_.size() - offset;
   }
 
-  template <typename T>
-  [[nodiscard]] std::optional<T> readObject(std::size_t offset) const
+  template <typename T> [[nodiscard]] std::optional<T> readObject(std::size_t offset) const
   {
     static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
     if (!canRead(offset, sizeof(T)))
@@ -36,14 +35,13 @@ public:
       return std::nullopt;
     }
 
-    T value {};
+    T value{};
     std::memcpy(&value, bytes_.data() + offset, sizeof(T));
     return value;
   }
 
-  [[nodiscard]] std::optional<std::span<const std::uint8_t>> readSpan(
-      std::size_t offset,
-      std::size_t length) const
+  [[nodiscard]] std::optional<std::span<const std::uint8_t>> readSpan(std::size_t offset,
+                                                                      std::size_t length) const
   {
     if (!canRead(offset, length))
     {
@@ -56,4 +54,4 @@ private:
   std::span<const std::uint8_t> bytes_;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

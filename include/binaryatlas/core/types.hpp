@@ -13,8 +13,8 @@ using Address = std::uint64_t;
 
 struct AddressRange
 {
-  Address start {};
-  Address end {};
+  Address start{};
+  Address end{};
 
   [[nodiscard]] bool contains(Address address) const
   {
@@ -69,46 +69,46 @@ enum class SymbolBinding
 
 struct BinaryMetadata
 {
-  BinaryFormat format {BinaryFormat::unknown};
-  Architecture architecture {Architecture::unknown};
-  Endianness endianness {Endianness::unknown};
+  BinaryFormat format{BinaryFormat::unknown};
+  Architecture architecture{Architecture::unknown};
+  Endianness endianness{Endianness::unknown};
   std::string format_version;
   std::string source_path;
-  std::uint64_t file_size {};
-  std::uint64_t entry_point {};
-  std::uint32_t abi {};
-  std::uint32_t abi_version {};
-  std::uint32_t type {};
-  std::uint32_t machine {};
-  bool stripped {false};
+  std::uint64_t file_size{};
+  std::uint64_t entry_point{};
+  std::uint32_t abi{};
+  std::uint32_t abi_version{};
+  std::uint32_t type{};
+  std::uint32_t machine{};
+  bool stripped{false};
 };
 
 struct Section
 {
   std::string name;
-  AddressRange range {};
-  std::uint64_t file_offset {};
-  std::uint64_t file_size {};
-  std::uint64_t alignment {};
-  std::uint64_t flags {};
-  std::uint32_t type {};
-  bool executable {false};
-  bool writable {false};
-  bool alloc {false};
+  AddressRange range{};
+  std::uint64_t file_offset{};
+  std::uint64_t file_size{};
+  std::uint64_t alignment{};
+  std::uint64_t flags{};
+  std::uint32_t type{};
+  bool executable{false};
+  bool writable{false};
+  bool alloc{false};
 };
 
 struct Segment
 {
   std::string type_name;
-  AddressRange range {};
-  std::uint64_t file_offset {};
-  std::uint64_t file_size {};
-  std::uint64_t memory_size {};
-  std::uint32_t flags {};
-  std::uint32_t type {};
-  bool executable {false};
-  bool writable {false};
-  bool readable {false};
+  AddressRange range{};
+  std::uint64_t file_offset{};
+  std::uint64_t file_size{};
+  std::uint64_t memory_size{};
+  std::uint32_t flags{};
+  std::uint32_t type{};
+  bool executable{false};
+  bool writable{false};
+  bool readable{false};
 };
 
 struct Symbol
@@ -116,29 +116,29 @@ struct Symbol
   std::string name;
   std::string section_name;
   std::string source_table;
-  Address address {};
-  std::uint64_t size {};
-  SymbolType type {SymbolType::unknown};
-  SymbolBinding binding {SymbolBinding::unknown};
-  bool defined {false};
-  bool imported {false};
-  bool exported {false};
+  Address address{};
+  std::uint64_t size{};
+  SymbolType type{SymbolType::unknown};
+  SymbolBinding binding{SymbolBinding::unknown};
+  bool defined{false};
+  bool imported{false};
+  bool exported{false};
 };
 
 struct Relocation
 {
   std::string section_name;
   std::string symbol_name;
-  Address address {};
-  std::uint32_t type {};
-  std::int64_t addend {};
-  bool has_addend {false};
+  Address address{};
+  std::uint32_t type{};
+  std::int64_t addend{};
+  bool has_addend{false};
 };
 
 struct ExtractedString
 {
   std::string section_name;
-  Address address {};
+  Address address{};
   std::string value;
 };
 
@@ -157,10 +157,10 @@ enum class InstructionFlowKind
 
 struct MemoryReference
 {
-  Address instruction_address {};
-  Address target {};
-  bool resolved {false};
-  bool rip_relative {false};
+  Address instruction_address{};
+  Address target{};
+  bool resolved{false};
+  bool rip_relative{false};
   std::string expression;
 };
 
@@ -183,4 +183,4 @@ enum class BlockEdgeType
 [[nodiscard]] std::string toString(InstructionFlowKind flow_kind);
 [[nodiscard]] std::string toString(BlockEdgeType edge_type);
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

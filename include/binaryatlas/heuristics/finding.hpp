@@ -14,9 +14,9 @@ struct HeuristicFinding
   std::string category;
   std::optional<Address> address;
   std::optional<Address> function;
-  double confidence {};
+  double confidence{};
   std::vector<std::string> evidence;
   std::string explanation;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

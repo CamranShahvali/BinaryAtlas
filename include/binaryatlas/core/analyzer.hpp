@@ -25,13 +25,11 @@ class BinaryAtlasEngine
 {
 public:
   [[nodiscard]] Result<BinaryImage> load(const std::filesystem::path& path) const;
-  [[nodiscard]] Result<DisassemblyResult> disassemble(
-      const std::filesystem::path& path,
-      const DisassemblyOptions& options = {}) const;
-  [[nodiscard]] Result<AnalysisBundle> analyze(
-      const std::filesystem::path& path,
-      const AnalysisOptions& analysis_options = {},
-      const HeuristicOptions& heuristic_options = {}) const;
+  [[nodiscard]] Result<DisassemblyResult> disassemble(const std::filesystem::path& path,
+                                                      const DisassemblyOptions& options = {}) const;
+  [[nodiscard]] Result<AnalysisBundle>
+  analyze(const std::filesystem::path& path, const AnalysisOptions& analysis_options = {},
+          const HeuristicOptions& heuristic_options = {}) const;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

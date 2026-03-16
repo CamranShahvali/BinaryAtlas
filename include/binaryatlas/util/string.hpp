@@ -16,9 +16,8 @@ namespace binaryatlas
 [[nodiscard]] inline std::string toLowerCopy(std::string_view value)
 {
   std::string result(value);
-  std::transform(result.begin(), result.end(), result.begin(), [](unsigned char ch) {
-    return static_cast<char>(std::tolower(ch));
-  });
+  std::transform(result.begin(), result.end(), result.begin(),
+                 [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
   return result;
 }
 
@@ -29,9 +28,8 @@ namespace binaryatlas
   return lowered_haystack.find(lowered_needle) != std::string::npos;
 }
 
-[[nodiscard]] inline std::optional<std::string> firstMatchingKeyword(
-    std::string_view value,
-    const std::vector<std::string>& keywords)
+[[nodiscard]] inline std::optional<std::string>
+firstMatchingKeyword(std::string_view value, const std::vector<std::string>& keywords)
 {
   for (const std::string& keyword : keywords)
   {
@@ -43,9 +41,8 @@ namespace binaryatlas
   return std::nullopt;
 }
 
-[[nodiscard]] inline std::string join(
-    const std::vector<std::string>& items,
-    std::string_view separator)
+[[nodiscard]] inline std::string join(const std::vector<std::string>& items,
+                                      std::string_view separator)
 {
   std::ostringstream stream;
   for (std::size_t index = 0; index < items.size(); ++index)
@@ -66,4 +63,4 @@ namespace binaryatlas
   return stream.str();
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

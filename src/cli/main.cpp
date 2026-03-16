@@ -28,9 +28,9 @@ struct CliOptions
   std::optional<std::filesystem::path> json_path;
   std::optional<std::filesystem::path> dot_path;
   std::optional<std::filesystem::path> dot_directory;
-  bool json_stdout {false};
-  bool verbose {false};
-  bool full {false};
+  bool json_stdout{false};
+  bool verbose{false};
+  bool full{false};
 };
 
 [[nodiscard]] std::optional<Address> parseAddress(std::string_view value)
@@ -60,15 +60,17 @@ struct CliOptions
 
 void printUsage()
 {
-  std::cerr << "BinaryAtlas\n"
-            << "Usage:\n"
-            << "  binaryatlas inspect <binary> [--json [path]] [--verbose]\n"
-            << "  binaryatlas disasm <binary> [--section name] [--start addr] [--end addr] [--json [path]]\n"
-            << "  binaryatlas functions <binary> [--json [path]] [--verbose]\n"
-            << "  binaryatlas cfg <binary> --function <addr|name> [--dot path] [--json [path]]\n"
-            << "  binaryatlas callgraph <binary> [--dot path] [--json [path]]\n"
-            << "  binaryatlas heuristics <binary> [--json [path]] [--verbose]\n"
-            << "  binaryatlas analyze <binary> [--full] [--dot-dir dir] [--json [path]] [--verbose]\n";
+  std::cerr
+      << "BinaryAtlas\n"
+      << "Usage:\n"
+      << "  binaryatlas inspect <binary> [--json [path]] [--verbose]\n"
+      << "  binaryatlas disasm <binary> [--section name] [--start addr] [--end addr] [--json "
+         "[path]]\n"
+      << "  binaryatlas functions <binary> [--json [path]] [--verbose]\n"
+      << "  binaryatlas cfg <binary> --function <addr|name> [--dot path] [--json [path]]\n"
+      << "  binaryatlas callgraph <binary> [--dot path] [--json [path]]\n"
+      << "  binaryatlas heuristics <binary> [--json [path]] [--verbose]\n"
+      << "  binaryatlas analyze <binary> [--full] [--dot-dir dir] [--json [path]] [--verbose]\n";
 }
 
 [[nodiscard]] std::optional<CliOptions> parseCli(int argc, char** argv)
@@ -185,10 +187,7 @@ void printUsage()
 }
 
 template <typename Renderer>
-int emit(
-    const CliOptions& options,
-    Renderer&& renderer,
-    std::string_view default_terminal_output)
+int emit(const CliOptions& options, Renderer&& renderer, std::string_view default_terminal_output)
 {
   const std::string rendered = renderer();
   if (options.json_stdout)
@@ -212,23 +211,20 @@ int emit(
   return EXIT_SUCCESS;
 }
 
-[[nodiscard]] const RecoveredFunction* resolveFunction(
-    const ProgramAnalysis& analysis,
-    const std::string& selector)
+[[nodiscard]] const RecoveredFunction* resolveFunction(const ProgramAnalysis& analysis,
+                                                       const std::string& selector)
 {
   if (const std::optional<Address> address = parseAddress(selector))
   {
-    const auto iterator = std::find_if(
-        analysis.functions.begin(),
-        analysis.functions.end(),
-        [address](const RecoveredFunction& function) { return function.entry == *address; });
+    const auto iterator = std::find_if(analysis.functions.begin(), analysis.functions.end(),
+                                       [address](const RecoveredFunction& function)
+                                       { return function.entry == *address; });
     return iterator == analysis.functions.end() ? nullptr : &*iterator;
   }
 
-  const auto iterator = std::find_if(
-      analysis.functions.begin(),
-      analysis.functions.end(),
-      [&selector](const RecoveredFunction& function) { return function.name == selector; });
+  const auto iterator = std::find_if(analysis.functions.begin(), analysis.functions.end(),
+                                     [&selector](const RecoveredFunction& function)
+                                     { return function.name == selector; });
   return iterator == analysis.functions.end() ? nullptr : &*iterator;
 }
 
@@ -244,8 +240,8 @@ int emit(
   return name;
 }
 
-}  // namespace
-}  // namespace binaryatlas
+} // namespace
+} // namespace binaryatlas
 
 int main(int argc, char** argv)
 {
@@ -269,8 +265,7 @@ int main(int argc, char** argv)
     }
 
     return emit(
-        *options,
-        [&]() { return JsonWriter::renderInspect(image.value()); },
+        *options, [&]() { return JsonWriter::renderInspect(image.value()); },
         TerminalRenderer::renderInspect(image.value(), options->verbose));
   }
 
@@ -290,8 +285,7 @@ int main(int argc, char** argv)
     }
 
     return emit(
-        *options,
-        [&]() { return JsonWriter::renderDisassembly(disassembly.value()); },
+        *options, [&]() { return JsonWriter::renderDisassembly(disassembly.value()); },
         TerminalRenderer::renderDisassembly(disassembly.value(), options->verbose));
   }
 
@@ -310,8 +304,7 @@ int main(int argc, char** argv)
     if (options->command == "functions")
     {
       return emit(
-          *options,
-          [&]() { return JsonWriter::renderFunctions(analysis_bundle.analysis); },
+          *options, [&]() { return JsonWriter::renderFunctions(analysis_bundle.analysis); },
           TerminalRenderer::renderFunctions(analysis_bundle.analysis, options->verbose));
     }
 
@@ -343,7 +336,8 @@ int main(int argc, char** argv)
 
       return emit(
           *options,
-          [&]() {
+          [&]()
+          {
             ProgramAnalysis single;
             single.functions = {*function};
             return JsonWriter::renderFunctions(single);
@@ -355,8 +349,8 @@ int main(int argc, char** argv)
     {
       if (options->dot_path.has_value())
       {
-        const Status status =
-            writeTextFile(*options->dot_path, DotExporter::exportCallGraph(analysis_bundle.analysis));
+        const Status status = writeTextFile(*options->dot_path,
+                                            DotExporter::exportCallGraph(analysis_bundle.analysis));
         if (!status)
         {
           std::cerr << status.error().message << '\n';
@@ -365,8 +359,7 @@ int main(int argc, char** argv)
       }
 
       return emit(
-          *options,
-          [&]() { return JsonWriter::renderFunctions(analysis_bundle.analysis); },
+          *options, [&]() { return JsonWriter::renderFunctions(analysis_bundle.analysis); },
           TerminalRenderer::renderCallGraph(analysis_bundle.analysis));
     }
 
@@ -390,8 +383,8 @@ int main(int argc, char** argv)
           return EXIT_FAILURE;
         }
 
-        if (const Status status =
-                writeTextFile(dot_dir / "callgraph.dot", DotExporter::exportCallGraph(analysis_bundle.analysis));
+        if (const Status status = writeTextFile(
+                dot_dir / "callgraph.dot", DotExporter::exportCallGraph(analysis_bundle.analysis));
             !status)
         {
           std::cerr << status.error().message << '\n';
@@ -413,8 +406,7 @@ int main(int argc, char** argv)
       }
 
       return emit(
-          *options,
-          [&]() { return JsonWriter::renderAnalysis(analysis_bundle); },
+          *options, [&]() { return JsonWriter::renderAnalysis(analysis_bundle); },
           TerminalRenderer::renderAnalysis(analysis_bundle, options->verbose));
     }
   }

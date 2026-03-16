@@ -18,7 +18,7 @@ enum class ErrorCode
 
 struct Error
 {
-  ErrorCode code {};
+  ErrorCode code{};
   std::string message;
 
   [[nodiscard]] static Error invalidArgument(std::string message);
@@ -32,4 +32,4 @@ struct Error
 
 [[nodiscard]] std::string toString(ErrorCode code);
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

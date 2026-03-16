@@ -13,12 +13,12 @@ using json = nlohmann::json;
 
 [[nodiscard]] json addressJson(Address address)
 {
-  return json {{ "value", address }, { "hex", formatHex(address) }};
+  return json{{"value", address}, {"hex", formatHex(address)}};
 }
 
 [[nodiscard]] json toJson(const BinaryMetadata& metadata)
 {
-  return json {
+  return json{
       {"format", toString(metadata.format)},
       {"architecture", toString(metadata.architecture)},
       {"endianness", toString(metadata.endianness)},
@@ -36,9 +36,10 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const Section& section)
 {
-  return json {
+  return json{
       {"name", section.name},
-      {"range", {{"start", addressJson(section.range.start)}, {"end", addressJson(section.range.end)}}},
+      {"range",
+       {{"start", addressJson(section.range.start)}, {"end", addressJson(section.range.end)}}},
       {"file_offset", section.file_offset},
       {"file_size", section.file_size},
       {"alignment", section.alignment},
@@ -52,9 +53,10 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const Segment& segment)
 {
-  return json {
+  return json{
       {"type_name", segment.type_name},
-      {"range", {{"start", addressJson(segment.range.start)}, {"end", addressJson(segment.range.end)}}},
+      {"range",
+       {{"start", addressJson(segment.range.start)}, {"end", addressJson(segment.range.end)}}},
       {"file_offset", segment.file_offset},
       {"file_size", segment.file_size},
       {"memory_size", segment.memory_size},
@@ -68,7 +70,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const Symbol& symbol)
 {
-  return json {
+  return json{
       {"name", symbol.name},
       {"section_name", symbol.section_name},
       {"source_table", symbol.source_table},
@@ -84,7 +86,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const Relocation& relocation)
 {
-  return json {
+  return json{
       {"section_name", relocation.section_name},
       {"symbol_name", relocation.symbol_name},
       {"address", addressJson(relocation.address)},
@@ -96,7 +98,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const ExtractedString& extracted)
 {
-  return json {
+  return json{
       {"section_name", extracted.section_name},
       {"address", addressJson(extracted.address)},
       {"value", extracted.value},
@@ -105,7 +107,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const MemoryReference& reference)
 {
-  return json {
+  return json{
       {"instruction_address", addressJson(reference.instruction_address)},
       {"target", addressJson(reference.target)},
       {"resolved", reference.resolved},
@@ -149,7 +151,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const FunctionSeed& seed)
 {
-  return json {
+  return json{
       {"address", addressJson(seed.address)},
       {"source", seed.source},
       {"label", seed.label},
@@ -185,7 +187,7 @@ using json = nlohmann::json;
     edges.push_back(toJson(edge));
   }
 
-  return json {
+  return json{
       {"start", addressJson(block.start)},
       {"end", addressJson(block.end)},
       {"instruction_addresses", instructions},
@@ -211,7 +213,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const FunctionMetrics& metrics)
 {
-  return json {
+  return json{
       {"block_count", metrics.block_count},
       {"edge_count", metrics.edge_count},
       {"instruction_count", metrics.instruction_count},
@@ -252,7 +254,7 @@ using json = nlohmann::json;
     callees.push_back(addressJson(callee));
   }
 
-  return json {
+  return json{
       {"entry", addressJson(function.entry)},
       {"name", function.name},
       {"seeds", seeds},
@@ -268,7 +270,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const CallGraphEdge& edge)
 {
-  return json {
+  return json{
       {"source", addressJson(edge.source)},
       {"target", addressJson(edge.target)},
       {"external", edge.external},
@@ -278,7 +280,7 @@ using json = nlohmann::json;
 
 [[nodiscard]] json toJson(const ProgramMetrics& metrics)
 {
-  return json {
+  return json{
       {"function_count", metrics.function_count},
       {"block_count", metrics.block_count},
       {"instruction_count", metrics.instruction_count},
@@ -314,7 +316,7 @@ using json = nlohmann::json;
   {
     instructions.push_back(toJson(instruction));
   }
-  return json {
+  return json{
       {"instruction_count", disassembly.instructions().size()},
       {"invalid_instruction_count", disassembly.invalidInstructionCount()},
       {"instructions", instructions},
@@ -341,7 +343,7 @@ using json = nlohmann::json;
     unused.push_back(toJson(seed));
   }
 
-  return json {
+  return json{
       {"functions", functions},
       {"call_graph", call_graph},
       {"metrics", toJson(analysis.metrics)},
@@ -349,7 +351,7 @@ using json = nlohmann::json;
   };
 }
 
-}  // namespace
+} // namespace
 
 std::string JsonWriter::renderInspect(const BinaryImage& image)
 {
@@ -383,7 +385,7 @@ std::string JsonWriter::renderInspect(const BinaryImage& image)
     strings.push_back(toJson(extracted));
   }
 
-  return json {
+  return json{
       {"metadata", toJson(image.metadata())},
       {"sections", sections},
       {"segments", segments},
@@ -413,7 +415,7 @@ std::string JsonWriter::renderHeuristics(const std::vector<HeuristicFinding>& fi
   {
     values.push_back(toJson(finding));
   }
-  return json {{"findings", values}}.dump(2);
+  return json{{"findings", values}}.dump(2);
 }
 
 std::string JsonWriter::renderAnalysis(const AnalysisBundle& bundle)
@@ -425,4 +427,4 @@ std::string JsonWriter::renderAnalysis(const AnalysisBundle& bundle)
   return value.dump(2);
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

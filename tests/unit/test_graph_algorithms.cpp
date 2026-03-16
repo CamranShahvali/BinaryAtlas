@@ -10,7 +10,7 @@ using namespace binaryatlas;
 
 TEST_CASE("Tarjan SCC detection finds loop components")
 {
-  AdjacencyList adjacency {
+  AdjacencyList adjacency{
       {1, {2}},
       {2, {3}},
       {3, {1, 4}},
@@ -35,8 +35,16 @@ TEST_CASE("Function metrics compute cyclomatic complexity from CFG edges")
        {{0x1000, 0x1010, BlockEdgeType::true_branch, true},
         {0x1000, 0x1020, BlockEdgeType::false_branch, true}},
        false},
-      {0x1010, 0x1014, {0x1010}, {{0x1010, std::nullopt, BlockEdgeType::return_edge, false}}, false},
-      {0x1020, 0x1024, {0x1020}, {{0x1020, std::nullopt, BlockEdgeType::return_edge, false}}, false},
+      {0x1010,
+       0x1014,
+       {0x1010},
+       {{0x1010, std::nullopt, BlockEdgeType::return_edge, false}},
+       false},
+      {0x1020,
+       0x1024,
+       {0x1020},
+       {{0x1020, std::nullopt, BlockEdgeType::return_edge, false}},
+       false},
   };
 
   const FunctionMetrics metrics = computeFunctionMetrics(function);
@@ -45,4 +53,4 @@ TEST_CASE("Function metrics compute cyclomatic complexity from CFG edges")
   CHECK(metrics.cyclomatic_complexity == 2);
 }
 
-}  // namespace
+} // namespace

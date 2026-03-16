@@ -7,27 +7,16 @@
 namespace binaryatlas
 {
 
-BinaryImage::BinaryImage(
-    BinaryMetadata metadata,
-    std::filesystem::path source_path,
-    std::vector<std::uint8_t> file_bytes,
-    std::vector<Section> sections,
-    std::vector<Segment> segments,
-    std::vector<Symbol> symbols,
-    std::vector<Relocation> relocations,
-    std::vector<std::string> imports,
-    std::vector<std::string> exports,
-    std::vector<ExtractedString> strings)
-    : metadata_(std::move(metadata)),
-      source_path_(std::move(source_path)),
-      file_bytes_(std::move(file_bytes)),
-      sections_(std::move(sections)),
-      segments_(std::move(segments)),
-      symbols_(std::move(symbols)),
-      relocations_(std::move(relocations)),
-      imports_(std::move(imports)),
-      exports_(std::move(exports)),
-      strings_(std::move(strings))
+BinaryImage::BinaryImage(BinaryMetadata metadata, std::filesystem::path source_path,
+                         std::vector<std::uint8_t> file_bytes, std::vector<Section> sections,
+                         std::vector<Segment> segments, std::vector<Symbol> symbols,
+                         std::vector<Relocation> relocations, std::vector<std::string> imports,
+                         std::vector<std::string> exports, std::vector<ExtractedString> strings)
+    : metadata_(std::move(metadata)), source_path_(std::move(source_path)),
+      file_bytes_(std::move(file_bytes)), sections_(std::move(sections)),
+      segments_(std::move(segments)), symbols_(std::move(symbols)),
+      relocations_(std::move(relocations)), imports_(std::move(imports)),
+      exports_(std::move(exports)), strings_(std::move(strings))
 {
 }
 
@@ -96,16 +85,15 @@ std::vector<AddressRange> BinaryImage::executableRanges() const
 
 bool BinaryImage::isExecutableAddress(Address address) const
 {
-  return std::any_of(sections_.begin(), sections_.end(), [address](const Section& section) {
-    return section.executable && section.range.contains(address);
-  });
+  return std::any_of(sections_.begin(), sections_.end(), [address](const Section& section)
+                     { return section.executable && section.range.contains(address); });
 }
 
 std::optional<Section> BinaryImage::findSectionByName(std::string_view name) const
 {
-  const auto iterator = std::find_if(sections_.begin(), sections_.end(), [name](const Section& section) {
-    return section.name == name;
-  });
+  const auto iterator =
+      std::find_if(sections_.begin(), sections_.end(),
+                   [name](const Section& section) { return section.name == name; });
   if (iterator == sections_.end())
   {
     return std::nullopt;
@@ -116,9 +104,8 @@ std::optional<Section> BinaryImage::findSectionByName(std::string_view name) con
 std::optional<Section> BinaryImage::findSectionContaining(Address address) const
 {
   const auto iterator =
-      std::find_if(sections_.begin(), sections_.end(), [address](const Section& section) {
-        return section.range.contains(address);
-      });
+      std::find_if(sections_.begin(), sections_.end(),
+                   [address](const Section& section) { return section.range.contains(address); });
   if (iterator == sections_.end())
   {
     return std::nullopt;
@@ -180,7 +167,8 @@ std::optional<Address> BinaryImage::fileOffsetToVa(std::size_t offset) const
   for (const Section& section : sections_)
   {
     const auto section_end = checkedAdd(section.file_offset, section.file_size);
-    if (!section_end.has_value() || *offset_u64 < section.file_offset || *offset_u64 >= *section_end)
+    if (!section_end.has_value() || *offset_u64 < section.file_offset ||
+        *offset_u64 >= *section_end)
     {
       continue;
     }
@@ -191,7 +179,8 @@ std::optional<Address> BinaryImage::fileOffsetToVa(std::size_t offset) const
   for (const Segment& segment : segments_)
   {
     const auto segment_end = checkedAdd(segment.file_offset, segment.file_size);
-    if (!segment_end.has_value() || *offset_u64 < segment.file_offset || *offset_u64 >= *segment_end)
+    if (!segment_end.has_value() || *offset_u64 < segment.file_offset ||
+        *offset_u64 >= *segment_end)
     {
       continue;
     }
@@ -223,9 +212,7 @@ std::vector<std::uint8_t> BinaryImage::readBytes(Address address, std::size_t si
     return {};
   }
 
-  return {
-      file_bytes_.begin() + *begin_index,
-      file_bytes_.begin() + *end_index};
+  return {file_bytes_.begin() + *begin_index, file_bytes_.begin() + *end_index};
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

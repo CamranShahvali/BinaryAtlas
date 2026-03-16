@@ -50,4 +50,4 @@ TEST_CASE("DOT exporter emits non-empty CFG and call graph text")
   CHECK(std::filesystem::file_size(dot_path) > 0);
 }
 
-}  // namespace
+} // namespace

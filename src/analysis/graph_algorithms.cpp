@@ -12,7 +12,7 @@ std::vector<Address> depthFirstReachable(const AdjacencyList& adjacency, Address
 {
   std::vector<Address> order;
   std::unordered_set<Address> visited;
-  std::vector<Address> stack {start};
+  std::vector<Address> stack{start};
 
   while (!stack.empty())
   {
@@ -48,7 +48,8 @@ StronglyConnectedComponents tarjanStronglyConnectedComponents(const AdjacencyLis
   std::vector<Address> stack;
   std::size_t next_index = 0;
 
-  std::function<void(Address)> strong_connect = [&](Address node) {
+  std::function<void(Address)> strong_connect = [&](Address node)
+  {
     indices[node] = next_index;
     lowlinks[node] = next_index;
     ++next_index;
@@ -107,12 +108,9 @@ StronglyConnectedComponents tarjanStronglyConnectedComponents(const AdjacencyLis
     }
   }
 
-  std::sort(
-      result.components.begin(),
-      result.components.end(),
-      [](const std::vector<Address>& left, const std::vector<Address>& right) {
-        return left.front() < right.front();
-      });
+  std::sort(result.components.begin(), result.components.end(),
+            [](const std::vector<Address>& left, const std::vector<Address>& right)
+            { return left.front() < right.front(); });
   return result;
 }
 
@@ -147,7 +145,7 @@ std::size_t connectedComponentCount(const AdjacencyList& adjacency)
     }
 
     ++component_count;
-    std::vector<Address> stack {node};
+    std::vector<Address> stack{node};
     while (!stack.empty())
     {
       const Address current = stack.back();
@@ -165,4 +163,4 @@ std::size_t connectedComponentCount(const AdjacencyList& adjacency)
   return component_count;
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

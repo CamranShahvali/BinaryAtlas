@@ -11,28 +11,28 @@ namespace binaryatlas
 
 struct BlockEdge
 {
-  Address source {};
+  Address source{};
   std::optional<Address> target;
-  BlockEdgeType type {BlockEdgeType::fallthrough};
-  bool intra_function {true};
+  BlockEdgeType type{BlockEdgeType::fallthrough};
+  bool intra_function{true};
 };
 
 struct CallSite
 {
-  Address instruction_address {};
+  Address instruction_address{};
   std::optional<Address> target;
-  bool indirect {false};
-  bool resolved {true};
+  bool indirect{false};
+  bool resolved{true};
   std::string operand_text;
 };
 
 struct BasicBlock
 {
-  Address start {};
-  Address end {};
+  Address start{};
+  Address end{};
   std::vector<Address> instruction_addresses;
   std::vector<BlockEdge> outgoing_edges;
-  bool partial {false};
+  bool partial{false};
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

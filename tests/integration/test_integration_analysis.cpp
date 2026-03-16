@@ -57,7 +57,8 @@ TEST_CASE("Graphics fixture surfaces render and runtime heuristic findings")
 
   CHECK(test_support::hasFinding(bundle.value().heuristic_findings, "candidate_render_api_hook"));
   CHECK(test_support::hasFinding(bundle.value().heuristic_findings, "candidate_vr_runtime_hook"));
-  CHECK(test_support::hasFinding(bundle.value().heuristic_findings, "candidate_engine_fingerprint"));
+  CHECK(
+      test_support::hasFinding(bundle.value().heuristic_findings, "candidate_engine_fingerprint"));
 }
 
 TEST_CASE("Stripped fixtures still produce partial structural recovery")
@@ -69,4 +70,4 @@ TEST_CASE("Stripped fixtures still produce partial structural recovery")
   CHECK(bundle.value().analysis.metrics.function_count >= 1);
 }
 
-}  // namespace
+} // namespace

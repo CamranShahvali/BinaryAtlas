@@ -13,17 +13,11 @@ namespace binaryatlas
 class BinaryImage
 {
 public:
-  BinaryImage(
-      BinaryMetadata metadata,
-      std::filesystem::path source_path,
-      std::vector<std::uint8_t> file_bytes,
-      std::vector<Section> sections,
-      std::vector<Segment> segments,
-      std::vector<Symbol> symbols,
-      std::vector<Relocation> relocations,
-      std::vector<std::string> imports,
-      std::vector<std::string> exports,
-      std::vector<ExtractedString> strings);
+  BinaryImage(BinaryMetadata metadata, std::filesystem::path source_path,
+              std::vector<std::uint8_t> file_bytes, std::vector<Section> sections,
+              std::vector<Segment> segments, std::vector<Symbol> symbols,
+              std::vector<Relocation> relocations, std::vector<std::string> imports,
+              std::vector<std::string> exports, std::vector<ExtractedString> strings);
 
   [[nodiscard]] const BinaryMetadata& metadata() const;
   [[nodiscard]] const std::filesystem::path& sourcePath() const;
@@ -57,4 +51,4 @@ private:
   std::vector<ExtractedString> strings_;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

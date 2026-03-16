@@ -16,8 +16,8 @@ std::string DotExporter::exportFunctionCfg(const RecoveredFunction& function)
 
   for (const BasicBlock& block : function.blocks)
   {
-    dot << "  \"" << formatHex(block.start) << "\" [label=\""
-        << formatHex(block.start) << "\\ninsns=" << block.instruction_addresses.size() << "\"];\n";
+    dot << "  \"" << formatHex(block.start) << "\" [label=\"" << formatHex(block.start)
+        << "\\ninsns=" << block.instruction_addresses.size() << "\"];\n";
   }
 
   for (const BasicBlock& block : function.blocks)
@@ -58,7 +58,8 @@ std::string DotExporter::exportCallGraph(const ProgramAnalysis& analysis)
   for (const CallGraphEdge& edge : analysis.call_graph)
   {
     dot << "  \"" << formatHex(edge.source) << "\" -> \"" << formatHex(edge.target) << "\"";
-    dot << " [label=\"" << (edge.target_name.empty() ? formatHex(edge.target) : edge.target_name) << "\"";
+    dot << " [label=\"" << (edge.target_name.empty() ? formatHex(edge.target) : edge.target_name)
+        << "\"";
     if (edge.external)
     {
       dot << ",style=dashed";
@@ -70,4 +71,4 @@ std::string DotExporter::exportCallGraph(const ProgramAnalysis& analysis)
   return dot.str();
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

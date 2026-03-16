@@ -25,8 +25,7 @@ private:
   std::optional<Error> error_;
 };
 
-template <typename T>
-class Result
+template <typename T> class Result
 {
 public:
   static Result success(T value)
@@ -95,4 +94,4 @@ private:
   std::optional<Error> error_;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

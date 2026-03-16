@@ -16,4 +16,4 @@ struct ProgramAnalysis
   std::vector<FunctionSeed> unused_seeds;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

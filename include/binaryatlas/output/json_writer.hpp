@@ -17,9 +17,8 @@ public:
   [[nodiscard]] static std::string renderInspect(const BinaryImage& image);
   [[nodiscard]] static std::string renderDisassembly(const DisassemblyResult& disassembly);
   [[nodiscard]] static std::string renderFunctions(const ProgramAnalysis& analysis);
-  [[nodiscard]] static std::string renderHeuristics(
-      const std::vector<HeuristicFinding>& findings);
+  [[nodiscard]] static std::string renderHeuristics(const std::vector<HeuristicFinding>& findings);
   [[nodiscard]] static std::string renderAnalysis(const AnalysisBundle& bundle);
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

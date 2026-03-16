@@ -11,30 +11,30 @@ namespace binaryatlas
 
 struct FunctionSeed
 {
-  Address address {};
+  Address address{};
   std::string source;
   std::string label;
-  double confidence {};
+  double confidence{};
 };
 
 struct FunctionMetrics
 {
-  std::size_t block_count {};
-  std::size_t edge_count {};
-  std::size_t instruction_count {};
-  std::uint64_t size_bytes {};
-  std::size_t loop_count {};
-  std::size_t connected_components {};
-  std::size_t max_in_degree {};
-  std::size_t max_out_degree {};
-  double average_out_degree {};
-  std::size_t call_out_degree {};
-  std::size_t cyclomatic_complexity {};
+  std::size_t block_count{};
+  std::size_t edge_count{};
+  std::size_t instruction_count{};
+  std::uint64_t size_bytes{};
+  std::size_t loop_count{};
+  std::size_t connected_components{};
+  std::size_t max_in_degree{};
+  std::size_t max_out_degree{};
+  double average_out_degree{};
+  std::size_t call_out_degree{};
+  std::size_t cyclomatic_complexity{};
 };
 
 struct RecoveredFunction
 {
-  Address entry {};
+  Address entry{};
   std::string name;
   std::vector<FunctionSeed> seed_reasons;
   std::vector<BasicBlock> blocks;
@@ -42,16 +42,16 @@ struct RecoveredFunction
   std::vector<Address> callees;
   std::vector<std::string> referenced_strings;
   FunctionMetrics metrics;
-  bool partial {false};
-  bool ambiguous {false};
+  bool partial{false};
+  bool ambiguous{false};
 };
 
 struct CallGraphEdge
 {
-  Address source {};
-  Address target {};
-  bool external {false};
+  Address source{};
+  Address target{};
+  bool external{false};
   std::string target_name;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

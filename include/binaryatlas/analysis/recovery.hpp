@@ -12,18 +12,17 @@ namespace binaryatlas
 
 struct AnalysisOptions
 {
-  bool enable_prologue_heuristics {true};
-  std::size_t high_fanout_threshold {5};
-  std::size_t complexity_threshold {8};
+  bool enable_prologue_heuristics{true};
+  std::size_t high_fanout_threshold{5};
+  std::size_t complexity_threshold{8};
 };
 
 class ProgramAnalyzer
 {
 public:
-  [[nodiscard]] Result<ProgramAnalysis> analyze(
-      const BinaryImage& image,
-      const DisassemblyResult& disassembly,
-      const AnalysisOptions& options = {}) const;
+  [[nodiscard]] Result<ProgramAnalysis> analyze(const BinaryImage& image,
+                                                const DisassemblyResult& disassembly,
+                                                const AnalysisOptions& options = {}) const;
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

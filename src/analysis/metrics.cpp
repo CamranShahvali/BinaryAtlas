@@ -32,7 +32,7 @@ namespace
   return adjacency;
 }
 
-}  // namespace
+} // namespace
 
 FunctionMetrics computeFunctionMetrics(const RecoveredFunction& function)
 {
@@ -76,8 +76,7 @@ FunctionMetrics computeFunctionMetrics(const RecoveredFunction& function)
   metrics.average_out_degree =
       metrics.block_count == 0
           ? 0.0
-          : static_cast<double>(internal_edge_count) /
-                static_cast<double>(metrics.block_count);
+          : static_cast<double>(internal_edge_count) / static_cast<double>(metrics.block_count);
 
   for (const BasicBlock& block : function.blocks)
   {
@@ -94,9 +93,8 @@ FunctionMetrics computeFunctionMetrics(const RecoveredFunction& function)
     }
 
     const auto iterator = adjacency.find(component.front());
-    if (iterator != adjacency.end() &&
-        std::find(iterator->second.begin(), iterator->second.end(), component.front()) !=
-            iterator->second.end())
+    if (iterator != adjacency.end() && std::find(iterator->second.begin(), iterator->second.end(),
+                                                 component.front()) != iterator->second.end())
     {
       ++metrics.loop_count;
     }
@@ -116,9 +114,8 @@ FunctionMetrics computeFunctionMetrics(const RecoveredFunction& function)
   return metrics;
 }
 
-ProgramMetrics computeProgramMetrics(
-    const std::vector<RecoveredFunction>& functions,
-    const std::vector<CallGraphEdge>& call_graph)
+ProgramMetrics computeProgramMetrics(const std::vector<RecoveredFunction>& functions,
+                                     const std::vector<CallGraphEdge>& call_graph)
 {
   ProgramMetrics metrics;
   metrics.function_count = functions.size();
@@ -141,4 +138,4 @@ ProgramMetrics computeProgramMetrics(
   return metrics;
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

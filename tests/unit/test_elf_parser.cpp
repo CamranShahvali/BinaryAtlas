@@ -27,10 +27,9 @@ TEST_CASE("ELF parser loads metadata, sections, and symbols from fixtures")
   REQUIRE(text.has_value());
   CHECK(text->executable);
 
-  const auto symbol = std::find_if(
-      image.value().symbols().begin(),
-      image.value().symbols().end(),
-      [](const Symbol& candidate) { return candidate.name == "caller"; });
+  const auto symbol =
+      std::find_if(image.value().symbols().begin(), image.value().symbols().end(),
+                   [](const Symbol& candidate) { return candidate.name == "caller"; });
   REQUIRE(symbol != image.value().symbols().end());
   CHECK(symbol->type == SymbolType::function);
 }
@@ -56,12 +55,10 @@ TEST_CASE("ELF parser rejects malformed and truncated inputs")
 {
   ElfParser parser;
 
-  const Result<BinaryImage> malformed =
-      parser.parseBuffer("malformed", {0x7fU, 'E', 'L', 'X'});
+  const Result<BinaryImage> malformed = parser.parseBuffer("malformed", {0x7fU, 'E', 'L', 'X'});
   REQUIRE_FALSE(malformed);
 
-  const Result<BinaryImage> truncated =
-      parser.parseBuffer("truncated", {0x7fU, 'E', 'L', 'F'});
+  const Result<BinaryImage> truncated = parser.parseBuffer("truncated", {0x7fU, 'E', 'L', 'F'});
   REQUIRE_FALSE(truncated);
 }
 
@@ -73,7 +70,7 @@ TEST_CASE("ELF parser rejects invalid section table locations")
   REQUIRE(bytes.value().size() >= sizeof(Elf64_Ehdr));
 
   std::vector<std::uint8_t> corrupted = bytes.value();
-  Elf64_Ehdr header {};
+  Elf64_Ehdr header{};
   std::memcpy(&header, corrupted.data(), sizeof(header));
   header.e_shoff = static_cast<std::uint64_t>(corrupted.size() - 8);
   header.e_shnum = 64;
@@ -92,21 +89,22 @@ TEST_CASE("ELF parser rejects overflowing section ranges")
   REQUIRE(bytes.value().size() >= sizeof(Elf64_Ehdr));
 
   std::vector<std::uint8_t> corrupted = bytes.value();
-  Elf64_Ehdr header {};
+  Elf64_Ehdr header{};
   std::memcpy(&header, corrupted.data(), sizeof(header));
   REQUIRE(header.e_shnum > 1);
 
   const std::size_t section_offset = static_cast<std::size_t>(header.e_shoff + header.e_shentsize);
   REQUIRE(section_offset + sizeof(Elf64_Shdr) <= corrupted.size());
 
-  Elf64_Shdr section {};
+  Elf64_Shdr section{};
   std::memcpy(&section, corrupted.data() + section_offset, sizeof(section));
   section.sh_addr = std::numeric_limits<std::uint64_t>::max() - 4;
   section.sh_size = 32;
   std::memcpy(corrupted.data() + section_offset, &section, sizeof(section));
 
   ElfParser parser;
-  const Result<BinaryImage> result = parser.parseBuffer("overflowing-section", std::move(corrupted));
+  const Result<BinaryImage> result =
+      parser.parseBuffer("overflowing-section", std::move(corrupted));
   REQUIRE_FALSE(result);
 }
 
@@ -118,7 +116,7 @@ TEST_CASE("ELF parser rejects symbol tables that extend beyond file contents")
   REQUIRE(bytes.value().size() >= sizeof(Elf64_Ehdr));
 
   std::vector<std::uint8_t> corrupted = bytes.value();
-  Elf64_Ehdr header {};
+  Elf64_Ehdr header{};
   std::memcpy(&header, corrupted.data(), sizeof(header));
 
   bool patched = false;
@@ -128,7 +126,7 @@ TEST_CASE("ELF parser rejects symbol tables that extend beyond file contents")
         static_cast<std::size_t>(header.e_shoff + (header.e_shentsize * index));
     REQUIRE(offset + sizeof(Elf64_Shdr) <= corrupted.size());
 
-    Elf64_Shdr section {};
+    Elf64_Shdr section{};
     std::memcpy(&section, corrupted.data() + offset, sizeof(section));
     if (section.sh_type != SHT_SYMTAB && section.sh_type != SHT_DYNSYM)
     {
@@ -145,8 +143,9 @@ TEST_CASE("ELF parser rejects symbol tables that extend beyond file contents")
   REQUIRE(patched);
 
   ElfParser parser;
-  const Result<BinaryImage> result = parser.parseBuffer("truncated-symbol-table", std::move(corrupted));
+  const Result<BinaryImage> result =
+      parser.parseBuffer("truncated-symbol-table", std::move(corrupted));
   REQUIRE_FALSE(result);
 }
 
-}  // namespace
+} // namespace

@@ -15,4 +15,4 @@ public:
   [[nodiscard]] static std::string exportCallGraph(const ProgramAnalysis& analysis);
 };
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

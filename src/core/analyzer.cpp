@@ -10,9 +10,8 @@ Result<BinaryImage> BinaryAtlasEngine::load(const std::filesystem::path& path) c
   return BinaryLoader::load(path);
 }
 
-Result<DisassemblyResult> BinaryAtlasEngine::disassemble(
-    const std::filesystem::path& path,
-    const DisassemblyOptions& options) const
+Result<DisassemblyResult> BinaryAtlasEngine::disassemble(const std::filesystem::path& path,
+                                                         const DisassemblyOptions& options) const
 {
   Result<BinaryImage> image = load(path);
   if (!image)
@@ -24,10 +23,9 @@ Result<DisassemblyResult> BinaryAtlasEngine::disassemble(
   return disassembler.disassemble(image.value(), options);
 }
 
-Result<AnalysisBundle> BinaryAtlasEngine::analyze(
-    const std::filesystem::path& path,
-    const AnalysisOptions& analysis_options,
-    const HeuristicOptions& heuristic_options) const
+Result<AnalysisBundle> BinaryAtlasEngine::analyze(const std::filesystem::path& path,
+                                                  const AnalysisOptions& analysis_options,
+                                                  const HeuristicOptions& heuristic_options) const
 {
   Result<BinaryImage> image = load(path);
   if (!image)
@@ -53,12 +51,9 @@ Result<AnalysisBundle> BinaryAtlasEngine::analyze(
   HeuristicDetector detector;
   std::vector<HeuristicFinding> findings =
       detector.analyze(image.value(), disassembly.value(), analysis.value(), heuristic_options);
-  AnalysisBundle bundle {
-      std::move(image.value()),
-      std::move(disassembly.value()),
-      std::move(analysis.value()),
-      std::move(findings)};
+  AnalysisBundle bundle{std::move(image.value()), std::move(disassembly.value()),
+                        std::move(analysis.value()), std::move(findings)};
   return Result<AnalysisBundle>::success(std::move(bundle));
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

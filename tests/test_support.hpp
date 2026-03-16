@@ -27,38 +27,26 @@ inline Result<AnalysisBundle> analyzeFixture(std::string_view name)
   return engine.analyze(fixturePath(name));
 }
 
-inline const RecoveredFunction* findFunctionByName(
-    const ProgramAnalysis& analysis,
-    std::string_view name)
+inline const RecoveredFunction* findFunctionByName(const ProgramAnalysis& analysis,
+                                                   std::string_view name)
 {
-  const auto iterator = std::find_if(
-      analysis.functions.begin(),
-      analysis.functions.end(),
-      [name](const RecoveredFunction& function) { return function.name == name; });
+  const auto iterator =
+      std::find_if(analysis.functions.begin(), analysis.functions.end(),
+                   [name](const RecoveredFunction& function) { return function.name == name; });
   return iterator == analysis.functions.end() ? nullptr : &*iterator;
 }
 
-inline bool hasCallEdge(
-    const ProgramAnalysis& analysis,
-    Address source,
-    Address target)
+inline bool hasCallEdge(const ProgramAnalysis& analysis, Address source, Address target)
 {
-  return std::any_of(
-      analysis.call_graph.begin(),
-      analysis.call_graph.end(),
-      [source, target](const CallGraphEdge& edge) {
-        return edge.source == source && edge.target == target;
-      });
+  return std::any_of(analysis.call_graph.begin(), analysis.call_graph.end(),
+                     [source, target](const CallGraphEdge& edge)
+                     { return edge.source == source && edge.target == target; });
 }
 
-inline bool hasFinding(
-    const std::vector<HeuristicFinding>& findings,
-    std::string_view category)
+inline bool hasFinding(const std::vector<HeuristicFinding>& findings, std::string_view category)
 {
-  return std::any_of(
-      findings.begin(),
-      findings.end(),
-      [category](const HeuristicFinding& finding) { return finding.category == category; });
+  return std::any_of(findings.begin(), findings.end(), [category](const HeuristicFinding& finding)
+                     { return finding.category == category; });
 }
 
-}  // namespace binaryatlas::test_support
+} // namespace binaryatlas::test_support

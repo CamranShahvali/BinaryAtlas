@@ -46,7 +46,7 @@ public:
   }
 
 private:
-  csh handle_ {};
+  csh handle_{};
 };
 
 [[nodiscard]] bool isUnconditionalJump(unsigned int instruction_id)
@@ -149,9 +149,8 @@ private:
   return groups;
 }
 
-[[nodiscard]] std::vector<MemoryReference> memoryReferences(
-    const cs_insn& instruction,
-    const BinaryImage* image)
+[[nodiscard]] std::vector<MemoryReference> memoryReferences(const cs_insn& instruction,
+                                                            const BinaryImage* image)
 {
   std::vector<MemoryReference> references;
   const cs_detail* detail = instruction.detail;
@@ -197,12 +196,8 @@ private:
       const auto section = image->findSectionContaining(static_cast<Address>(operand.imm));
       if (section.has_value())
       {
-        references.push_back(
-            {instruction.address,
-             static_cast<Address>(operand.imm),
-             true,
-             false,
-             instruction.op_str});
+        references.push_back({instruction.address, static_cast<Address>(operand.imm), true, false,
+                              instruction.op_str});
       }
     }
   }
@@ -210,11 +205,9 @@ private:
   return references;
 }
 
-[[nodiscard]] Instruction buildInstruction(
-    csh handle,
-    const cs_insn& decoded,
-    const std::string& section_name,
-    const BinaryImage* image)
+[[nodiscard]] Instruction buildInstruction(csh handle, const cs_insn& decoded,
+                                           const std::string& section_name,
+                                           const BinaryImage* image)
 {
   Instruction instruction;
   instruction.section_name = section_name;
@@ -231,10 +224,8 @@ private:
   return instruction;
 }
 
-[[nodiscard]] Instruction buildInvalidInstruction(
-    Address address,
-    std::uint8_t value,
-    const std::string& section_name)
+[[nodiscard]] Instruction buildInvalidInstruction(Address address, std::uint8_t value,
+                                                  const std::string& section_name)
 {
   Instruction instruction;
   instruction.section_name = section_name;
@@ -250,11 +241,9 @@ private:
   return instruction;
 }
 
-[[nodiscard]] Result<DisassemblyResult> disassembleBufferInternal(
-    const std::vector<std::uint8_t>& bytes,
-    Address base_address,
-    const std::string& section_name,
-    const BinaryImage* image)
+[[nodiscard]] Result<DisassemblyResult>
+disassembleBufferInternal(const std::vector<std::uint8_t>& bytes, Address base_address,
+                          const std::string& section_name, const BinaryImage* image)
 {
   CapstoneHandle handle;
   if (!handle.valid())
@@ -263,7 +252,8 @@ private:
   }
 
   DisassemblyResult result;
-  auto deleter = [](cs_insn* ptr) {
+  auto deleter = [](cs_insn* ptr)
+  {
     if (ptr != nullptr)
     {
       cs_free(ptr, 1);
@@ -273,7 +263,8 @@ private:
 
   if (!instruction)
   {
-    return Result<DisassemblyResult>::failure(Error::disassembly("failed to allocate Capstone instruction"));
+    return Result<DisassemblyResult>::failure(
+        Error::disassembly("failed to allocate Capstone instruction"));
   }
 
   const std::uint8_t* code = bytes.data();
@@ -297,7 +288,7 @@ private:
   return Result<DisassemblyResult>::success(std::move(result));
 }
 
-}  // namespace
+} // namespace
 
 const std::vector<Instruction>& DisassemblyResult::instructions() const
 {
@@ -322,8 +313,8 @@ const Instruction* DisassemblyResult::find(Address address) const
 std::vector<const Instruction*> DisassemblyResult::inAddressRange(Address start, Address end) const
 {
   std::vector<const Instruction*> instructions;
-  for (auto iterator = address_index_.lower_bound(start); iterator != address_index_.end() && iterator->first < end;
-       ++iterator)
+  for (auto iterator = address_index_.lower_bound(start);
+       iterator != address_index_.end() && iterator->first < end; ++iterator)
   {
     instructions.push_back(&instructions_[iterator->second]);
   }
@@ -358,9 +349,8 @@ void DisassemblyResult::addInstruction(Instruction instruction)
   instructions_.push_back(std::move(instruction));
 }
 
-Result<DisassemblyResult> Disassembler::disassemble(
-    const BinaryImage& image,
-    const DisassemblyOptions& options) const
+Result<DisassemblyResult> Disassembler::disassemble(const BinaryImage& image,
+                                                    const DisassemblyOptions& options) const
 {
   DisassemblyResult result;
 
@@ -384,7 +374,8 @@ Result<DisassemblyResult> Disassembler::disassemble(
 
     const Address section_start = section.range.start;
     const Address section_end = section.range.end;
-    const Address requested_start = std::max(section_start, options.start_address.value_or(section_start));
+    const Address requested_start =
+        std::max(section_start, options.start_address.value_or(section_start));
     const Address requested_end = std::min(section_end, options.end_address.value_or(section_end));
 
     if (requested_start >= requested_end)
@@ -403,9 +394,11 @@ Result<DisassemblyResult> Disassembler::disassemble(
     const std::size_t length = static_cast<std::size_t>(
         std::min<std::uint64_t>(requested_end - requested_start, section_file_size - start_offset));
     const auto section_file_offset = checkedIntegralCast<std::size_t>(section.file_offset);
-    const auto slice_start =
-        section_file_offset.has_value() ? checkedAdd(*section_file_offset, start_offset) : std::nullopt;
-    const auto slice_end = slice_start.has_value() ? checkedAdd(*slice_start, length) : std::nullopt;
+    const auto slice_start = section_file_offset.has_value()
+                                 ? checkedAdd(*section_file_offset, start_offset)
+                                 : std::nullopt;
+    const auto slice_end =
+        slice_start.has_value() ? checkedAdd(*slice_start, length) : std::nullopt;
     const auto begin_index =
         slice_start.has_value() ? checkedIntegralCast<std::ptrdiff_t>(*slice_start) : std::nullopt;
     const auto end_index =
@@ -452,12 +445,11 @@ Result<DisassemblyResult> Disassembler::disassemble(
   return Result<DisassemblyResult>::success(std::move(result));
 }
 
-Result<DisassemblyResult> Disassembler::disassembleBytes(
-    Address base_address,
-    const std::vector<std::uint8_t>& bytes,
-    std::string section_name) const
+Result<DisassemblyResult> Disassembler::disassembleBytes(Address base_address,
+                                                         const std::vector<std::uint8_t>& bytes,
+                                                         std::string section_name) const
 {
   return disassembleBufferInternal(bytes, base_address, section_name, nullptr);
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas

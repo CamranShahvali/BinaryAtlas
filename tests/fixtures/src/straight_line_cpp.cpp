@@ -10,7 +10,7 @@ int compute(int value)
   return doubled + 7;
 }
 
-}  // namespace
+} // namespace
 
 int main()
 {

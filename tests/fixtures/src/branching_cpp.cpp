@@ -17,7 +17,7 @@ int classify(int value)
   return value > 10 ? 2 : 1;
 }
 
-}  // namespace
+} // namespace
 
 int main()
 {

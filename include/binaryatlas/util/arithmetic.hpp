@@ -14,20 +14,17 @@ concept Integral = std::is_integral_v<T>;
 template <typename T>
 concept UnsignedIntegral = Integral<T> && std::is_unsigned_v<T>;
 
-template <UnsignedIntegral T>
-[[nodiscard]] constexpr bool addWouldOverflow(T left, T right)
+template <UnsignedIntegral T> [[nodiscard]] constexpr bool addWouldOverflow(T left, T right)
 {
   return left > std::numeric_limits<T>::max() - right;
 }
 
-template <UnsignedIntegral T>
-[[nodiscard]] constexpr bool multiplyWouldOverflow(T left, T right)
+template <UnsignedIntegral T> [[nodiscard]] constexpr bool multiplyWouldOverflow(T left, T right)
 {
   return right != 0 && left > std::numeric_limits<T>::max() / right;
 }
 
-template <UnsignedIntegral T>
-[[nodiscard]] constexpr std::optional<T> checkedAdd(T left, T right)
+template <UnsignedIntegral T> [[nodiscard]] constexpr std::optional<T> checkedAdd(T left, T right)
 {
   if (addWouldOverflow(left, right))
   {
@@ -103,4 +100,4 @@ template <UnsignedIntegral T>
   return checkedAdd(start, size);
 }
 
-}  // namespace binaryatlas
+} // namespace binaryatlas
