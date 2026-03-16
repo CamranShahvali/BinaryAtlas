@@ -57,6 +57,12 @@ option(
 )
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+string(MAKE_C_IDENTIFIER "${CMAKE_GENERATOR}" BINARYATLAS_GENERATOR_ID)
+set(
+  FETCHCONTENT_BASE_DIR
+  "${CMAKE_BINARY_DIR}/_deps_${BINARYATLAS_GENERATOR_ID}"
+  CACHE PATH "BinaryAtlas FetchContent base directory" FORCE
+)
 include(FetchContent)
 
 if(BINARYATLAS_USE_SYSTEM_DEPS)
@@ -171,6 +177,7 @@ set(BINARYATLAS_PUBLIC_HEADERS
     include/binaryatlas/output/json_writer.hpp
     include/binaryatlas/output/terminal_renderer.hpp
     include/binaryatlas/util/byte_reader.hpp
+    include/binaryatlas/util/arithmetic.hpp
     include/binaryatlas/util/file_io.hpp
     include/binaryatlas/util/string.hpp
 )

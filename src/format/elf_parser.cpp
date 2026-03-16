@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "binaryatlas/core/error.hpp"
+#include "binaryatlas/util/arithmetic.hpp"
 #include "binaryatlas/util/byte_reader.hpp"
 #include "binaryatlas/util/file_io.hpp"
 
@@ -32,11 +33,6 @@ constexpr std::array<unsigned char, 4> kElfMagic {0x7fU, 'E', 'L', 'F'};
   return std::equal(prefix.begin(), prefix.end(), bytes.begin(), [](unsigned char expected, std::uint8_t actual) {
     return expected == actual;
   });
-}
-
-[[nodiscard]] bool addWouldOverflow(std::uint64_t left, std::uint64_t right)
-{
-  return left > std::numeric_limits<std::uint64_t>::max() - right;
 }
 
 [[nodiscard]] std::string readCString(std::span<const std::uint8_t> bytes, std::size_t offset)
@@ -174,6 +170,62 @@ constexpr std::array<unsigned char, 4> kElfMagic {0x7fU, 'E', 'L', 'F'};
   return strings;
 }
 
+[[nodiscard]] Result<std::span<const std::uint8_t>> readBoundedSpan(
+    const ByteReader& reader,
+    std::uint64_t offset,
+    std::uint64_t size,
+    std::string_view label)
+{
+  const auto readable_bytes = checkedIntegralCast<std::uint64_t>(reader.size());
+  if (!readable_bytes.has_value())
+  {
+    return Result<std::span<const std::uint8_t>>::failure(
+        Error::parse("host size limit exceeded while parsing " + std::string(label)));
+  }
+
+  if (!rangeFitsWithin(offset, size, *readable_bytes))
+  {
+    return Result<std::span<const std::uint8_t>>::failure(
+        Error::parse(std::string(label) + " extends beyond file contents"));
+  }
+
+  const auto safe_offset = checkedIntegralCast<std::size_t>(offset);
+  const auto safe_size = checkedIntegralCast<std::size_t>(size);
+  if (!safe_offset.has_value() || !safe_size.has_value())
+  {
+    return Result<std::span<const std::uint8_t>>::failure(
+        Error::parse(std::string(label) + " exceeds host size limits"));
+  }
+
+  const auto span = reader.readSpan(*safe_offset, *safe_size);
+  if (!span.has_value())
+  {
+    return Result<std::span<const std::uint8_t>>::failure(
+        Error::parse(std::string(label) + " extends beyond file contents"));
+  }
+
+  return Result<std::span<const std::uint8_t>>::success(*span);
+}
+
+[[nodiscard]] Result<std::uint64_t> computeEntryCount(
+    std::uint64_t byte_size,
+    std::uint64_t entry_size,
+    std::string_view label)
+{
+  if (entry_size == 0)
+  {
+    return Result<std::uint64_t>::success(0);
+  }
+
+  if (byte_size % entry_size != 0)
+  {
+    return Result<std::uint64_t>::failure(
+        Error::parse("malformed " + std::string(label) + " size"));
+  }
+
+  return Result<std::uint64_t>::success(byte_size / entry_size);
+}
+
 template <typename EntryType>
 [[nodiscard]] Result<std::vector<EntryType>> readTable(
     const ByteReader& reader,
@@ -193,18 +245,49 @@ template <typename EntryType>
     return Result<std::vector<EntryType>>::success({});
   }
 
-  if (addWouldOverflow(offset, entry_size * count))
+  const auto total_bytes = checkedMultiply(entry_size, count);
+  if (!total_bytes.has_value())
   {
     return Result<std::vector<EntryType>>::failure(
         Error::parse("overflow while parsing " + std::string(label)));
   }
 
+  const auto readable_bytes = checkedIntegralCast<std::uint64_t>(reader.size());
+  if (!readable_bytes.has_value())
+  {
+    return Result<std::vector<EntryType>>::failure(
+        Error::parse("host size limit exceeded while parsing " + std::string(label)));
+  }
+
+  if (!rangeFitsWithin(offset, *total_bytes, *readable_bytes))
+  {
+    return Result<std::vector<EntryType>>::failure(
+        Error::parse("truncated " + std::string(label) + " table"));
+  }
+
+  const auto safe_count = checkedIntegralCast<std::size_t>(count);
+  if (!safe_count.has_value())
+  {
+    return Result<std::vector<EntryType>>::failure(
+        Error::parse(std::string(label) + " table exceeds host size limits"));
+  }
+
   std::vector<EntryType> entries;
-  entries.reserve(static_cast<std::size_t>(count));
+  entries.reserve(*safe_count);
   for (std::uint64_t index = 0; index < count; ++index)
   {
-    const auto entry = reader.readObject<EntryType>(
-        static_cast<std::size_t>(offset + (entry_size * index)));
+    const auto relative_offset = checkedMultiply(entry_size, index);
+    const auto entry_offset = relative_offset.has_value() ? checkedAdd(offset, *relative_offset)
+                                                          : std::nullopt;
+    const auto safe_offset =
+        entry_offset.has_value() ? checkedIntegralCast<std::size_t>(*entry_offset) : std::nullopt;
+    if (!safe_offset.has_value())
+    {
+      return Result<std::vector<EntryType>>::failure(
+          Error::parse("overflow while parsing " + std::string(label)));
+    }
+
+    const auto entry = reader.readObject<EntryType>(*safe_offset);
     if (!entry.has_value())
     {
       return Result<std::vector<EntryType>>::failure(
@@ -245,6 +328,11 @@ Result<BinaryImage> ElfParser::parseBuffer(
   }
 
   const ByteReader reader(file_bytes);
+  const auto file_size = checkedIntegralCast<std::uint64_t>(file_bytes.size());
+  if (!file_size.has_value())
+  {
+    return Result<BinaryImage>::failure(Error::parse("file exceeds supported host size limits"));
+  }
   const auto header = reader.readObject<Elf64_Ehdr>(0);
   if (!header.has_value())
   {
@@ -292,24 +380,38 @@ Result<BinaryImage> ElfParser::parseBuffer(
   }
 
   const Elf64_Shdr& shstrtab = section_headers.value()[header->e_shstrndx];
-  const auto shstrtab_span = reader.readSpan(
-      static_cast<std::size_t>(shstrtab.sh_offset), static_cast<std::size_t>(shstrtab.sh_size));
-  if (!shstrtab_span.has_value())
+  const Result<std::span<const std::uint8_t>> shstrtab_span =
+      readBoundedSpan(reader, shstrtab.sh_offset, shstrtab.sh_size, "section string table");
+  if (!shstrtab_span)
   {
-    return Result<BinaryImage>::failure(Error::parse("invalid section string table"));
+    return Result<BinaryImage>::failure(shstrtab_span.error());
   }
 
   std::vector<Section> sections;
   sections.reserve(section_headers.value().size());
-  for (const Elf64_Shdr& section_header : section_headers.value())
+  for (std::size_t section_index = 0; section_index < section_headers.value().size(); ++section_index)
   {
+    const Elf64_Shdr& section_header = section_headers.value()[section_index];
     Section section;
-    section.name = readCString(*shstrtab_span, section_header.sh_name);
+    section.name = readCString(shstrtab_span.value(), section_header.sh_name);
+    const std::string section_label =
+        section.name.empty() ? "section[" + std::to_string(section_index) + "]" : section.name;
+
+    const auto section_end = checkedRangeEnd(section_header.sh_addr, section_header.sh_size);
+    if (!section_end.has_value())
+    {
+      return Result<BinaryImage>::failure(
+          Error::parse("section range overflows address space: " + section_label));
+    }
+    if (section_header.sh_type != SHT_NOBITS && section_header.sh_size > 0 &&
+        !rangeFitsWithin(section_header.sh_offset, section_header.sh_size, *file_size))
+    {
+      return Result<BinaryImage>::failure(
+          Error::parse("section extends beyond file contents: " + section_label));
+    }
+
     section.range.start = section_header.sh_addr;
-    section.range.end =
-        addWouldOverflow(section_header.sh_addr, section_header.sh_size)
-            ? section_header.sh_addr
-            : section_header.sh_addr + section_header.sh_size;
+    section.range.end = *section_end;
     section.file_offset = section_header.sh_offset;
     section.file_size = section_header.sh_size;
     section.alignment = section_header.sh_addralign;
@@ -330,15 +432,26 @@ Result<BinaryImage> ElfParser::parseBuffer(
 
   std::vector<Segment> segments;
   segments.reserve(program_headers.value().size());
-  for (const Elf64_Phdr& program_header : program_headers.value())
+  for (std::size_t segment_index = 0; segment_index < program_headers.value().size(); ++segment_index)
   {
+    const Elf64_Phdr& program_header = program_headers.value()[segment_index];
+    const auto segment_end = checkedRangeEnd(program_header.p_vaddr, program_header.p_memsz);
+    if (!segment_end.has_value())
+    {
+      return Result<BinaryImage>::failure(
+          Error::parse("segment range overflows address space: segment[" + std::to_string(segment_index) + "]"));
+    }
+    if (program_header.p_filesz > 0 &&
+        !rangeFitsWithin(program_header.p_offset, program_header.p_filesz, *file_size))
+    {
+      return Result<BinaryImage>::failure(
+          Error::parse("segment extends beyond file contents: segment[" + std::to_string(segment_index) + "]"));
+    }
+
     Segment segment;
     segment.type_name = programHeaderTypeName(program_header.p_type);
     segment.range.start = program_header.p_vaddr;
-    segment.range.end =
-        addWouldOverflow(program_header.p_vaddr, program_header.p_memsz)
-            ? program_header.p_vaddr
-            : program_header.p_vaddr + program_header.p_memsz;
+    segment.range.end = *segment_end;
     segment.file_offset = program_header.p_offset;
     segment.file_size = program_header.p_filesz;
     segment.memory_size = program_header.p_memsz;
@@ -370,18 +483,28 @@ Result<BinaryImage> ElfParser::parseBuffer(
 
     has_symtab = has_symtab || symtab_section.sh_type == SHT_SYMTAB;
     const Elf64_Shdr& string_table_section = section_headers.value()[symtab_section.sh_link];
-    const auto string_table = reader.readSpan(
-        static_cast<std::size_t>(string_table_section.sh_offset),
-        static_cast<std::size_t>(string_table_section.sh_size));
-    if (!string_table.has_value())
+    const Result<std::span<const std::uint8_t>> string_table = readBoundedSpan(
+        reader,
+        string_table_section.sh_offset,
+        string_table_section.sh_size,
+        "ELF symbol string table");
+    if (!string_table)
     {
-      return Result<BinaryImage>::failure(Error::parse("invalid ELF symbol string table"));
+      return Result<BinaryImage>::failure(string_table.error());
     }
 
-    const std::uint64_t symbol_count =
-        symtab_section.sh_entsize == 0U ? 0U : symtab_section.sh_size / symtab_section.sh_entsize;
+    const Result<std::uint64_t> symbol_count =
+        computeEntryCount(symtab_section.sh_size, symtab_section.sh_entsize, "symbol table");
+    if (!symbol_count)
+    {
+      return Result<BinaryImage>::failure(symbol_count.error());
+    }
     Result<std::vector<Elf64_Sym>> symbol_entries = readTable<Elf64_Sym>(
-        reader, symtab_section.sh_offset, symtab_section.sh_entsize, symbol_count, "symbol");
+        reader,
+        symtab_section.sh_offset,
+        symtab_section.sh_entsize,
+        symbol_count.value(),
+        "symbol");
     if (!symbol_entries)
     {
       return Result<BinaryImage>::failure(symbol_entries.error());
@@ -391,7 +514,7 @@ Result<BinaryImage> ElfParser::parseBuffer(
     for (const Elf64_Sym& symbol_entry : symbol_entries.value())
     {
       Symbol symbol;
-      symbol.name = readCString(*string_table, symbol_entry.st_name);
+      symbol.name = readCString(string_table.value(), symbol_entry.st_name);
       symbol.address = symbol_entry.st_value;
       symbol.size = symbol_entry.st_size;
       symbol.type = mapSymbolType(symbol_entry.st_info);
@@ -452,17 +575,24 @@ Result<BinaryImage> ElfParser::parseBuffer(
     }
 
     const Elf64_Shdr& relocation_strings_section = section_headers.value()[linked_symbol_section.sh_link];
-    const auto relocation_strings = reader.readSpan(
-        static_cast<std::size_t>(relocation_strings_section.sh_offset),
-        static_cast<std::size_t>(relocation_strings_section.sh_size));
-    if (!relocation_strings.has_value())
+    const Result<std::span<const std::uint8_t>> relocation_strings = readBoundedSpan(
+        reader,
+        relocation_strings_section.sh_offset,
+        relocation_strings_section.sh_size,
+        "relocation string table");
+    if (!relocation_strings)
     {
-      return Result<BinaryImage>::failure(Error::parse("invalid relocation string table"));
+      return Result<BinaryImage>::failure(relocation_strings.error());
     }
 
-    const std::uint64_t relocation_count = relocation_section.sh_entsize == 0U
-                                               ? 0U
-                                               : relocation_section.sh_size / relocation_section.sh_entsize;
+    const Result<std::uint64_t> relocation_count = computeEntryCount(
+        relocation_section.sh_size,
+        relocation_section.sh_entsize,
+        relocation_section.sh_type == SHT_RELA ? "rela relocation table" : "rel relocation table");
+    if (!relocation_count)
+    {
+      return Result<BinaryImage>::failure(relocation_count.error());
+    }
 
     if (relocation_section.sh_type == SHT_RELA)
     {
@@ -470,20 +600,26 @@ Result<BinaryImage> ElfParser::parseBuffer(
           reader,
           relocation_section.sh_offset,
           relocation_section.sh_entsize,
-          relocation_count,
+          relocation_count.value(),
           "rela relocation");
       if (!entries)
       {
         return Result<BinaryImage>::failure(entries.error());
       }
 
-      const std::uint64_t symbol_count =
-          linked_symbol_section.sh_entsize == 0U ? 0U : linked_symbol_section.sh_size / linked_symbol_section.sh_entsize;
+      const Result<std::uint64_t> symbol_count = computeEntryCount(
+          linked_symbol_section.sh_size,
+          linked_symbol_section.sh_entsize,
+          "relocation symbol table");
+      if (!symbol_count)
+      {
+        return Result<BinaryImage>::failure(symbol_count.error());
+      }
       Result<std::vector<Elf64_Sym>> relocation_symbols = readTable<Elf64_Sym>(
           reader,
           linked_symbol_section.sh_offset,
           linked_symbol_section.sh_entsize,
-          symbol_count,
+          symbol_count.value(),
           "relocation symbol");
       if (!relocation_symbols)
       {
@@ -496,7 +632,9 @@ Result<BinaryImage> ElfParser::parseBuffer(
         std::string symbol_name;
         if (symbol_index < relocation_symbols.value().size())
         {
-          symbol_name = readCString(*relocation_strings, relocation_symbols.value()[symbol_index].st_name);
+          symbol_name = readCString(
+              relocation_strings.value(),
+              relocation_symbols.value()[symbol_index].st_name);
         }
 
         relocations.push_back(
@@ -514,20 +652,26 @@ Result<BinaryImage> ElfParser::parseBuffer(
           reader,
           relocation_section.sh_offset,
           relocation_section.sh_entsize,
-          relocation_count,
+          relocation_count.value(),
           "rel relocation");
       if (!entries)
       {
         return Result<BinaryImage>::failure(entries.error());
       }
 
-      const std::uint64_t symbol_count =
-          linked_symbol_section.sh_entsize == 0U ? 0U : linked_symbol_section.sh_size / linked_symbol_section.sh_entsize;
+      const Result<std::uint64_t> symbol_count = computeEntryCount(
+          linked_symbol_section.sh_size,
+          linked_symbol_section.sh_entsize,
+          "relocation symbol table");
+      if (!symbol_count)
+      {
+        return Result<BinaryImage>::failure(symbol_count.error());
+      }
       Result<std::vector<Elf64_Sym>> relocation_symbols = readTable<Elf64_Sym>(
           reader,
           linked_symbol_section.sh_offset,
           linked_symbol_section.sh_entsize,
-          symbol_count,
+          symbol_count.value(),
           "relocation symbol");
       if (!relocation_symbols)
       {
@@ -540,7 +684,9 @@ Result<BinaryImage> ElfParser::parseBuffer(
         std::string symbol_name;
         if (symbol_index < relocation_symbols.value().size())
         {
-          symbol_name = readCString(*relocation_strings, relocation_symbols.value()[symbol_index].st_name);
+          symbol_name = readCString(
+              relocation_strings.value(),
+              relocation_symbols.value()[symbol_index].st_name);
         }
 
         relocations.push_back(

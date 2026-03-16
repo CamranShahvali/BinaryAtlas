@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "binaryatlas/util/arithmetic.hpp"
+
 namespace binaryatlas
 {
 
@@ -136,7 +138,12 @@ std::optional<std::size_t> BinaryImage::vaToFileOffset(Address address) const
     const std::uint64_t delta = address - section.range.start;
     if (delta < section.file_size)
     {
-      return static_cast<std::size_t>(section.file_offset + delta);
+      const auto file_offset = checkedAdd(section.file_offset, delta);
+      if (!file_offset.has_value())
+      {
+        return std::nullopt;
+      }
+      return checkedIntegralCast<std::size_t>(*file_offset);
     }
   }
 
@@ -150,7 +157,12 @@ std::optional<std::size_t> BinaryImage::vaToFileOffset(Address address) const
     const std::uint64_t delta = address - segment.range.start;
     if (delta < segment.file_size)
     {
-      return static_cast<std::size_t>(segment.file_offset + delta);
+      const auto file_offset = checkedAdd(segment.file_offset, delta);
+      if (!file_offset.has_value())
+      {
+        return std::nullopt;
+      }
+      return checkedIntegralCast<std::size_t>(*file_offset);
     }
   }
 
@@ -159,24 +171,32 @@ std::optional<std::size_t> BinaryImage::vaToFileOffset(Address address) const
 
 std::optional<Address> BinaryImage::fileOffsetToVa(std::size_t offset) const
 {
+  const auto offset_u64 = checkedIntegralCast<std::uint64_t>(offset);
+  if (!offset_u64.has_value())
+  {
+    return std::nullopt;
+  }
+
   for (const Section& section : sections_)
   {
-    if (offset < section.file_offset || offset >= section.file_offset + section.file_size)
+    const auto section_end = checkedAdd(section.file_offset, section.file_size);
+    if (!section_end.has_value() || *offset_u64 < section.file_offset || *offset_u64 >= *section_end)
     {
       continue;
     }
 
-    return section.range.start + static_cast<Address>(offset - section.file_offset);
+    return checkedAdd(section.range.start, static_cast<Address>(*offset_u64 - section.file_offset));
   }
 
   for (const Segment& segment : segments_)
   {
-    if (offset < segment.file_offset || offset >= segment.file_offset + segment.file_size)
+    const auto segment_end = checkedAdd(segment.file_offset, segment.file_size);
+    if (!segment_end.has_value() || *offset_u64 < segment.file_offset || *offset_u64 >= *segment_end)
     {
       continue;
     }
 
-    return segment.range.start + static_cast<Address>(offset - segment.file_offset);
+    return checkedAdd(segment.range.start, static_cast<Address>(*offset_u64 - segment.file_offset));
   }
 
   return std::nullopt;
@@ -190,14 +210,22 @@ std::vector<std::uint8_t> BinaryImage::readBytes(Address address, std::size_t si
     return {};
   }
 
-  if (*file_offset > file_bytes_.size() || size > file_bytes_.size() - *file_offset)
+  const auto end_offset = checkedAdd(*file_offset, size);
+  if (!end_offset.has_value() || *end_offset > file_bytes_.size())
+  {
+    return {};
+  }
+
+  const auto begin_index = checkedIntegralCast<std::ptrdiff_t>(*file_offset);
+  const auto end_index = checkedIntegralCast<std::ptrdiff_t>(*end_offset);
+  if (!begin_index.has_value() || !end_index.has_value())
   {
     return {};
   }
 
   return {
-      file_bytes_.begin() + static_cast<std::ptrdiff_t>(*file_offset),
-      file_bytes_.begin() + static_cast<std::ptrdiff_t>(*file_offset + size)};
+      file_bytes_.begin() + *begin_index,
+      file_bytes_.begin() + *end_index};
 }
 
 }  // namespace binaryatlas

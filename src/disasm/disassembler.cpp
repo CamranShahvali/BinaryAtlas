@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "binaryatlas/core/error.hpp"
+#include "binaryatlas/util/arithmetic.hpp"
 
 namespace binaryatlas
 {
@@ -401,8 +402,23 @@ Result<DisassemblyResult> Disassembler::disassemble(
 
     const std::size_t length = static_cast<std::size_t>(
         std::min<std::uint64_t>(requested_end - requested_start, section_file_size - start_offset));
-    const auto begin = image.fileBytes().begin() + static_cast<std::ptrdiff_t>(section.file_offset + start_offset);
-    const auto end = begin + static_cast<std::ptrdiff_t>(length);
+    const auto section_file_offset = checkedIntegralCast<std::size_t>(section.file_offset);
+    const auto slice_start =
+        section_file_offset.has_value() ? checkedAdd(*section_file_offset, start_offset) : std::nullopt;
+    const auto slice_end = slice_start.has_value() ? checkedAdd(*slice_start, length) : std::nullopt;
+    const auto begin_index =
+        slice_start.has_value() ? checkedIntegralCast<std::ptrdiff_t>(*slice_start) : std::nullopt;
+    const auto end_index =
+        slice_end.has_value() ? checkedIntegralCast<std::ptrdiff_t>(*slice_end) : std::nullopt;
+    if (!slice_end.has_value() || *slice_end > image.fileBytes().size() ||
+        !begin_index.has_value() || !end_index.has_value())
+    {
+      return Result<DisassemblyResult>::failure(
+          Error::disassembly("executable section slice exceeds host size limits"));
+    }
+
+    const auto begin = image.fileBytes().begin() + *begin_index;
+    const auto end = image.fileBytes().begin() + *end_index;
     std::vector<std::uint8_t> bytes(begin, end);
 
     Result<DisassemblyResult> partial =

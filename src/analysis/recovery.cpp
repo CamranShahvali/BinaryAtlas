@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "binaryatlas/analysis/metrics.hpp"
+#include "binaryatlas/util/arithmetic.hpp"
 #include "binaryatlas/util/string.hpp"
 
 namespace binaryatlas
@@ -234,9 +235,18 @@ struct RecoveredState
       {
         for (const ExtractedString& candidate : image.extractedStrings())
         {
-          const Address end =
-              candidate.address + static_cast<Address>(candidate.value.size()) + static_cast<Address>(1);
-          if (reference.target >= candidate.address && reference.target < end)
+          const auto string_size_bytes =
+              checkedAdd(candidate.value.size(), std::size_t {1});
+          const auto string_size = string_size_bytes.has_value()
+                                       ? checkedIntegralCast<Address>(*string_size_bytes)
+                                       : std::nullopt;
+          const auto end = string_size.has_value() ? checkedAdd(candidate.address, *string_size)
+                                                   : std::nullopt;
+          if (!end.has_value())
+          {
+            continue;
+          }
+          if (reference.target >= candidate.address && reference.target < *end)
           {
             strings.insert(candidate.value);
           }
@@ -297,7 +307,17 @@ struct RecoveredState
 
       block.instruction_addresses.push_back(current->address);
       state.instructions.insert(current->address);
-      const Address next_address = current->address + current->size;
+      const auto next_address_value =
+          checkedAdd(current->address, static_cast<Address>(current->size));
+      if (!next_address_value.has_value())
+      {
+        block.end = current->address;
+        block.partial = true;
+        state.function.partial = true;
+        current = nullptr;
+        break;
+      }
+      const Address next_address = *next_address_value;
 
       switch (current->flow_kind)
       {
